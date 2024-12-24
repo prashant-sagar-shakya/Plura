@@ -135,7 +135,7 @@ const AgencyDetails = ({ data }: Props) => {
       }
 
       newUserData = await initUser({ role: "AGENCY_OWNER" });
-      if (!data?.customerId && !custId) return;
+      // if (!data?.customerId && !custId) return;
 
       const response = await upsertAgency({
         id: data?.id ? data.id : v4(),
@@ -199,8 +199,8 @@ const AgencyDetails = ({ data }: Props) => {
         <CardHeader>
           <CardTitle>Agency Information</CardTitle>
           <CardDescription>
-            Lets create an agency for you business. You can edit agency settings
-            later from the agency settings tab.
+            Lets create an agency for your business. You can edit agency
+            settings later from the agency settings tab.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -348,7 +348,7 @@ const AgencyDetails = ({ data }: Props) => {
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Zipcpde</FormLabel>
+                      <FormLabel>Zipcode</FormLabel>
                       <FormControl>
                         <Input placeholder="Zipcode" {...field} />
                       </FormControl>
