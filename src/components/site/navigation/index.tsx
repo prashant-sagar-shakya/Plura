@@ -21,8 +21,8 @@ const Navigation = ({ user }: Props) => {
         />
         <span className="text-xl font-bold"> Plura.</span>
       </aside>
-      <nav className="hidden md:block absolute left-[50%] top-[50%] transform translate-x-[-50%] translate-y-[-50%]">
-        <ul className="flex items-center justify-center gap-8">
+      <nav className="hidden md:block absolute left-[50%] top-[50%] transform translate-x-[-50%] translate-y-[-50%] backdrop-filter backdrop-blur-lg bg-opacity-20 rounded-full">
+        <ul className="flex items-center justify-center gap-10 py-3 px-5">
           <Link href={"#"}>Pricing</Link>
           <Link href={"#"}>About</Link>
           <Link href={"#"}>Documentation</Link>
