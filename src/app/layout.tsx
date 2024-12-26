@@ -34,6 +34,6 @@ export default function RootLayout({
           </ModalProvider>
         </ThemeProvider>
       </body>
-      </html>
+    </html>
   );
 }

@@ -9,15 +9,6 @@ const nextConfig = {
       "files.stripe.com",
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/site",
-        permanent: true,
-      },
-    ];
-  },
   reactStrictMode: false,
 };
 
