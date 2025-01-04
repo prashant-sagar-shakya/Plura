@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import BlurPage from "../../../../../components/global/blur-page";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -8,8 +7,11 @@ import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useUser } from "@clerk/clerk-react";
+import { FaHistory } from "react-icons/fa"; // Import history icon
 
-const genAI = new GoogleGenerativeAI(`${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`);
+const genAI = new GoogleGenerativeAI(
+  `${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`
+);
 
 type Props = {
   params: { subaccountId: string };
@@ -28,7 +30,29 @@ const Automations = ({ params }: Props) => {
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false); // State to handle copy action
+  const [copied, setCopied] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State to toggle sidebar
+  const sidebarRef = useRef<HTMLDivElement | null>(null); // Reference for sidebar
+
+  // Close sidebar if clicking outside of it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    // Add event listener for detecting outside clicks
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Clean up event listener on component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
@@ -52,7 +76,7 @@ const Automations = ({ params }: Props) => {
         {
           sender: "gemini",
           text: result.response.text(),
-          isMarkdown: isMarkdownResponse, // Indicates markdown content
+          isMarkdown: isMarkdownResponse,
         },
       ]);
 
@@ -103,7 +127,7 @@ const Automations = ({ params }: Props) => {
             }) {
               const match = /language-(\w+)/.exec(className || "");
               return !inline && match ? (
-                <div style={{ position: "relative" }}>
+                <div className="relative">
                   <SyntaxHighlighter
                     style={dark}
                     language={match[1]}
@@ -119,104 +143,40 @@ const Automations = ({ params }: Props) => {
                   </SyntaxHighlighter>
                   <CopyToClipboard
                     text={String(children).replace(/\n$/, "")}
-                    onCopy={() => setCopied(true)} // Set copied state when copied
+                    onCopy={() => setCopied(true)}
                   >
-                    <button
-                      style={{
-                        position: "absolute",
-                        top: "10px",
-                        right: "10px",
-                        padding: "6px 12px",
-                        backgroundColor: "#007BFF",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {copied ? "Copied!" : "Copy Code"}{" "}
-                      {/* Show "Copied!" after copying */}
+                    <button className="absolute top-2 right-2 px-3 py-1 bg-blue-600 text-white rounded-md text-sm">
+                      {copied ? "Copied!" : "Copy Code"}
                     </button>
                   </CopyToClipboard>
                 </div>
               ) : (
-                <code
-                  {...props}
-                  style={{
-                    backgroundColor: "gray",
-                    padding: "2px 4px",
-                    borderRadius: "4px",
-                  }}
-                >
+                <code {...props} className="bg-gray-300 px-1 py-0.5 rounded-sm">
                   {children}
                 </code>
               );
             },
             p({ children }) {
               return (
-                <p
-                  style={{
-                    marginBottom: "10px",
-                    fontSize: "16px",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  {children}
-                </p>
+                <p className="mb-2 text-base leading-relaxed">{children}</p>
               );
             },
             ul({ children }) {
-              return (
-                <ul
-                  style={{
-                    marginLeft: "20px",
-                    listStyleType: "circle",
-                    marginBottom: "10px",
-                  }}
-                >
-                  {children}
-                </ul>
-              );
+              return <ul className="ml-5 list-disc mb-2">{children}</ul>;
             },
             li({ children }) {
-              return (
-                <li
-                  style={{
-                    marginBottom: "8px",
-                    fontSize: "16px",
-                  }}
-                >
-                  {children}
-                </li>
-              );
+              return <li className="mb-2 text-base">{children}</li>;
             },
             strong({ children }) {
               return (
-                <strong
-                  style={{
-                    fontWeight: "bold",
-                    color: "#007BFF", // You can adjust the color for bold text
-                  }}
-                >
-                  {children}
-                </strong>
+                <strong className="font-bold text-blue-600">{children}</strong>
               );
             },
             em({ children }) {
-              return (
-                <em
-                  style={{
-                    fontStyle: "italic",
-                    color: "#FF6347", // You can adjust the color for italic text
-                  }}
-                >
-                  {children}
-                </em>
-              );
+              return <em className="italic text-red-500">{children}</em>;
             },
             br() {
-              return <br />; // Line breaks
+              return <br />;
             },
           }}
         >
@@ -226,9 +186,7 @@ const Automations = ({ params }: Props) => {
     }
 
     return (
-      <div
-        style={{ padding: "12px 20px", fontSize: "16px", lineHeight: "1.6" }}
-      >
+      <div className="px-5 text-base leading-relaxed">
         <ReactMarkdown>{message.text}</ReactMarkdown>
       </div>
     );
@@ -236,10 +194,10 @@ const Automations = ({ params }: Props) => {
 
   return (
     <BlurPage>
-      <div style={{ padding: "20px", display: "flex", height: "100vh" }}>
-        {/* Left Section: Search Bar */}
-        <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
+      <div className="p-10 flex h-screen flex-col md:flex-row">
+        {/* Left Section: Chat Messages */}
+        <div className="flex-[3] flex flex-col">
+          <div className="flex items-center">
             <input
               type="text"
               value={searchTerm}
@@ -250,61 +208,31 @@ const Automations = ({ params }: Props) => {
                 }
               }}
               placeholder="Ask with AI"
-              style={{
-                padding: "12px",
-                width: "80%",
-                marginRight: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-                fontSize: "16px",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-              }}
+              className="p-3 w-full sm:w-4/5 mr-2 rounded-full text-base shadow-md"
             />
             <button
               onClick={handleSearch}
-              style={{
-                padding: "12px 24px",
-                backgroundColor: "#007BFF",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "16px",
-              }}
+              className="px-4 py-2 sm:px-6 sm:py-3 bg-blue-700 text-white rounded-full text-base"
             >
               {loading ? "Searching..." : "Search"}
             </button>
           </div>
+
           {/* Chat Messages */}
-          <div
-            style={{
-              flex: 1,
-              marginTop: "20px",
-              overflowY: "auto",
-              paddingLeft: "0px",
-              marginRight: "60px",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-              scrollbarWidth: "none", // Firefox
-              msOverflowStyle: "none", // IE and Edge
-            }}
-          >
+          <div className="flex-1 mt-5 overflow-y-auto ml-[-1.2rem] lg:ml-0 px-0 lg:mr-14 shadow-md">
             <style>
               {`
                 div::-webkit-scrollbar {
-                  display: none; /* Chrome, Safari, Opera */
+                  display: none;
                 }
               `}
             </style>
             {messages.map((message, index) => (
               <div
                 key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    message.sender === "user" ? "flex-end" : "flex-start",
-                  marginBottom: "15px",
-                }}
+                className={`flex items-center justify-${
+                  message.sender === "user" ? "end" : "start"
+                } mb-4`}
               >
                 <img
                   src={
@@ -313,24 +241,13 @@ const Automations = ({ params }: Props) => {
                       : "/icons/gemini-icon.png"
                   }
                   alt={message.sender}
-                  style={{
-                    borderRadius: "50%",
-                    width: "40px",
-                    height: "40px",
-                    marginRight: "10px",
-                  }}
+                  className="rounded-full w-8 h-8 sm:w-10 sm:h-10 ml-2 p-1"
                 />
                 <div
-                  style={{
-                    backgroundColor:
-                      message.sender === "user" ? "#007BFF" : "#2c2c2c", // Gemini AI's response in dark gray
-                    color: message.sender === "user" ? "white" : "white",
-                    padding: "5px",
-                    borderRadius: "15px",
-                    maxWidth: "70%",
-                    wordWrap: "break-word",
-                    fontSize: "14px",
-                  }}
+                  className={`bg-${
+                    message.sender === "user" ? "blue-700" : "gray-800"
+                  }
+                    text-white p-3 sm:p-4 rounded-xl max-w-full sm:max-w-3/4 break-words text-sm`}
                 >
                   {renderMessage(message)}
                 </div>
@@ -339,60 +256,75 @@ const Automations = ({ params }: Props) => {
           </div>
         </div>
 
-        {/* Right Section: History and Clear Chat */}
-        <div
-          style={{
-            flex: 1,
-            borderLeft: "1px solid #ccc",
-            paddingLeft: "20px",
-          }}
-        >
-          <h3 className="text-lg font-semibold mb-4">Search History</h3>
-          <ul style={{ listStyle: "none", padding: 0 }}>
+        {/* Right Section: Search History */}
+        <div className="flex-1 border-l border-gray-300 pl-5 hidden md:flex flex-col">
+          <h3 className="p-3 w-full sm:w-4/5 mr-2 text-lg font-semibold mb-4 md:mt-0 mt-4">
+            Search History
+          </h3>
+          <ul className="list-none p-0">
             {searchHistory.map((term, index) => (
               <li
                 key={index}
-                style={{
-                  display: "block",
-                  padding: "12px",
-                  marginBottom: "10px",
-                  borderRadius: "8px",
-                  backgroundColor: "rgba(169, 169, 169, 0.2)",
-                  cursor: "pointer",
-                  color: "white",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                }}
+                className="block p-3 mb-2 rounded-md bg-gray-900 cursor-pointer text-white text-sm"
                 onClick={() => handleHistoryClick(term)}
               >
                 {term}
               </li>
             ))}
           </ul>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "20px",
-            }}
-          >
+          <div className="flex justify-center mt-5">
             <button
               onClick={clearChat}
-              style={{
-                marginTop: "20px",
-                padding: "10px 20px",
-                backgroundColor: "#fa3b18",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+              className="mt-5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
             >
               Clear Chat
             </button>
           </div>
         </div>
+
+        {/* Sidebar for Small Devices */}
+        {isSidebarOpen && (
+          <div
+            ref={sidebarRef} // Attach the ref to sidebar div
+            className={`fixed top-0 right-0 w-2/3 h-full bg-gray-800 text-white flex flex-col p-5 z-50 md:hidden transform transition-transform ease-in-out duration-500 ${
+              isSidebarOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <button
+              className="self-end mb-5 text-red-600"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              Close
+            </button>
+            <h3 className="text-lg font-semibold mb-4 mt-10">Search History</h3>
+            <ul className="list-none p-0">
+              {searchHistory.map((term, index) => (
+                <li
+                  key={index}
+                  className="block p-3 mb-2 rounded-md bg-gray-900 cursor-pointer text-white text-sm backdrop-filter backdrop-blur-lg bg-opacity-50"
+                  onClick={() => handleHistoryClick(term)}
+                >
+                  {term}
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-center mt-5">
+              <button
+                onClick={clearChat}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+              >
+                Clear Chat
+              </button>
+            </div>
+          </div>
+        )}
+        {/* History Icon Button */}
+        <button
+          className="fixed bottom-5 right-5 md:hidden bg-blue-700 text-white p-3 rounded-full shadow-lg"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)} // Toggle sidebar visibility
+        >
+          <FaHistory size={20} />
+        </button>
       </div>
     </BlurPage>
   );
