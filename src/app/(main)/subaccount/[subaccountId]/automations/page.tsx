@@ -28,6 +28,7 @@ const Automations = ({ params }: Props) => {
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false); // State to handle copy action
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
@@ -88,7 +89,18 @@ const Automations = ({ params }: Props) => {
       return (
         <ReactMarkdown
           components={{
-            code({ node, inline, className, children, ...props }: { node?: any, inline?: boolean, className?: string, children?: React.ReactNode }) {
+            code({
+              node,
+              inline,
+              className,
+              children,
+              ...props
+            }: {
+              node?: any;
+              inline?: boolean;
+              className?: string;
+              children?: React.ReactNode;
+            }) {
               const match = /language-(\w+)/.exec(className || "");
               return !inline && match ? (
                 <div style={{ position: "relative" }}>
@@ -105,7 +117,10 @@ const Automations = ({ params }: Props) => {
                   >
                     {String(children).replace(/\n$/, "")}
                   </SyntaxHighlighter>
-                  <CopyToClipboard text={String(children).replace(/\n$/, "")}>
+                  <CopyToClipboard
+                    text={String(children).replace(/\n$/, "")}
+                    onCopy={() => setCopied(true)} // Set copied state when copied
+                  >
                     <button
                       style={{
                         position: "absolute",
@@ -120,7 +135,8 @@ const Automations = ({ params }: Props) => {
                         fontSize: "12px",
                       }}
                     >
-                      Copy Code
+                      {copied ? "Copied!" : "Copy Code"}{" "}
+                      {/* Show "Copied!" after copying */}
                     </button>
                   </CopyToClipboard>
                 </div>
@@ -210,10 +226,10 @@ const Automations = ({ params }: Props) => {
     }
 
     return (
-      <div style={{ padding: "12px 20px", fontSize: "16px", lineHeight: "1.6" }}>
-        <ReactMarkdown>
-          {message.text}
-        </ReactMarkdown>
+      <div
+        style={{ padding: "12px 20px", fontSize: "16px", lineHeight: "1.6" }}
+      >
+        <ReactMarkdown>{message.text}</ReactMarkdown>
       </div>
     );
   };
@@ -297,11 +313,6 @@ const Automations = ({ params }: Props) => {
                       : "/icons/gemini-icon.png"
                   }
                   alt={message.sender}
-                  // style={{
-                  //   marginRight: "10px",
-                  //   width: "30px",
-                  //   height: "30px",
-                  // }}
                   style={{
                     borderRadius: "50%",
                     width: "40px",
@@ -342,15 +353,15 @@ const Automations = ({ params }: Props) => {
               <li
                 key={index}
                 style={{
-                  display: "block", // Changed from inline-block to block
-                  padding: "12px", // Add padding for spacing inside the box
-                  marginBottom: "10px", // Add margin between items
-                  borderRadius: "8px", // Rounded corners
+                  display: "block",
+                  padding: "12px",
+                  marginBottom: "10px",
+                  borderRadius: "8px",
                   backgroundColor: "rgba(169, 169, 169, 0.2)",
                   cursor: "pointer",
                   color: "white",
                   textDecoration: "none",
-                  fontSize: "14px", // Adjust font size if needed
+                  fontSize: "14px",
                 }}
                 onClick={() => handleHistoryClick(term)}
               >
