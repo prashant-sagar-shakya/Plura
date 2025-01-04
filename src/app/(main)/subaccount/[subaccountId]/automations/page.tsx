@@ -9,7 +9,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useUser } from "@clerk/clerk-react";
 
-const genAI = new GoogleGenerativeAI("AIzaSyBtPGgfBv1fgQFU67Wq6uXHpPspvgpQEm8");
+const genAI = new GoogleGenerativeAI(`${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`);
 
 type Props = {
   params: { subaccountId: string };
@@ -272,7 +272,7 @@ const Automations = ({ params }: Props) => {
                 fontSize: "16px",
               }}
             >
-              {loading ? "Searching" : "Search"}
+              {loading ? "Searching..." : "Search"}
             </button>
           </div>
           {/* Chat Messages */}
@@ -381,7 +381,7 @@ const Automations = ({ params }: Props) => {
               style={{
                 marginTop: "20px",
                 padding: "10px 20px",
-                backgroundColor: "red",
+                backgroundColor: "#fa3b18",
                 color: "white",
                 border: "none",
                 borderRadius: "6px",
