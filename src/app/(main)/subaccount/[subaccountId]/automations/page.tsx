@@ -321,7 +321,7 @@ const Automations = ({ params }: Props) => {
         {/* History Icon Button */}
         <button
           className="fixed bottom-5 right-5 md:hidden bg-blue-700 text-white p-3 rounded-full shadow-lg"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)} // Toggle sidebar visibility
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           <FaHistory size={20} />
         </button>
